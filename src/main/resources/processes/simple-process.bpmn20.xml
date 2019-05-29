@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:activiti="http://activiti.org/bpmn"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+	xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+	typeLanguage="http://www.w3.org/2001/XMLSchema"
+	expressionLanguage="http://www.w3.org/1999/XPath"
+	targetNamespace="Examples">
+	<process id="objApprovalProcess" name="object status"
+		isExecutable="true">
+		<documentation>This is a workflow to approve the object.
+		</documentation>
+		<startEvent id="startEvent1">
+			<extensionElements>
+				<activiti:formProperty id="requestId"
+					name="request ID" type="String" />
+				<activiti:formProperty id="objectId"
+					name="object ID" type="String" required="true" />
+				<activiti:formProperty id="objectType"
+					name="object Type" type="String" required="true" />
+				<activiti:formProperty id="author"
+					name="Author" type="String" required="true" />
+				<activiti:formProperty id="reviewer"
+					name="Reviewer" type="String" required="true" />
+				<activiti:formProperty id="approver"
+					name="Approver" type="String" required="true" />
+			</extensionElements>
+		</startEvent>
+		<userTask id="pendingForReview" name="Pending For Review"
+			activiti:assignee="${reviewer}">
+			<extensionElements>
+				<activiti:formProperty id="reviewerApproved"
+					name="Do you approve this object" type="enum" required="true">
+					<activiti:value id="true" name="Approve" />
+					<activiti:value id="false" name="Reject" />
+				</activiti:formProperty>
+				<activiti:formProperty id="reviewercomments"
+					name="reviewer comments" type="string" />
+			</extensionElements>
+		</userTask>
+		<sequenceFlow id="flow1" sourceRef="startEvent1"
+			targetRef="pendingForReview" />
+		<exclusiveGateway id="gate1" />
+		<sequenceFlow id="flow2" sourceRef="pendingForReview"
+			targetRef="gate1" />
+		<userTask id="pendingForApproval" name="Pending For Approval"
+			activiti:assignee="${approver}">
+			<extensionElements>
+				<activiti:formProperty id="approverApproved"
+					name="Do you approve this object" type="enum" required="true">
+					<activiti:value id="true" name="Approve" />
+					<activiti:value id="false" name="Reject" />
+				</activiti:formProperty>
+				<activiti:formProperty id="approverComments"
+					name="reviewer comments" type="string" />
+			</extensionElements>
+		</userTask>
+		<endEvent id="endEvent1" />
+		<sequenceFlow id="flow3" sourceRef="gate1"
+			targetRef="endEvent1">
+			<conditionExpression xsi:type="tFormalExpression">${reviewerApproved
+				== 'false'}
+			</conditionExpression>
+		</sequenceFlow>
+		<sequenceFlow id="flow4" sourceRef="gate1"
+			targetRef="pendingForApproval">
+			<conditionExpression xsi:type="tFormalExpression">${reviewerApproved
+				== 'true'}
+			</conditionExpression>
+		</sequenceFlow>
+		<endEvent id="endEvent2" />
+		<sequenceFlow id="flow5" sourceRef="pendingForApproval"
+			targetRef="endEvent2" />
+	</process>
+</definitions>
