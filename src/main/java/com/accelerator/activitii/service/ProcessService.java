@@ -1,5 +1,7 @@
 package com.accelerator.activitii.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.accelerator.activitii.model.TaskResponseBody;
 
 @Service
 public class ProcessService {
@@ -28,46 +32,95 @@ public class ProcessService {
 	@Autowired
 	private RepositoryService repositoryService;
 
-	public void startTheProcess(String requestId, String objectId, String objectType, String author, String reviewer,
-			String approver, String processDefinitionId) {
+	public void startTheProcess(Map<String, Object> parameters, String processDefinitionId) {
 
-		Map<String, Object> objectVariables = new HashMap<String, Object>();
-		objectVariables.put("requestId", requestId);
-		objectVariables.put("objectId", objectId);
-		objectVariables.put("objectType", objectType);
-		objectVariables.put("author", author);
-		objectVariables.put("reviewer", reviewer);
-		objectVariables.put("approver", approver);
-
-		//runtimeService.startProcessInstanceByKey(processDefinitionId, objectVariables);
-		runtimeService.startProcessInstanceByKey(processDefinitionId, requestId, objectVariables);
-		logger.info("process {} is statred ", processDefinitionId);
+		runtimeService.startProcessInstanceByKey(processDefinitionId, (String) parameters.get("requestId"), parameters);
+		logger.info("process {} is started ", processDefinitionId);
 
 	}
 
-	public List<Task> getTasks(String assignee) {
+	public List<TaskResponseBody> getTasks(String assignee) {
 		List<Task> taskList = taskService.createTaskQuery().taskAssignee(assignee).list();
-		return taskList;
+
+		List<TaskResponseBody> responseTaskList = new ArrayList<TaskResponseBody>();
+
+		taskList.forEach(task -> {
+			String taskId = task.getId();
+			Map<String, Object> processVariables = taskService.getVariables(taskId);
+			responseTaskList.add(new TaskResponseBody(task, processVariables));
+		});
+
+		return responseTaskList;
 	}
 
-	public void completeReviewerTask(String taskId, String reviewerApproved, String objectReviewerReview) {
+	public List<TaskResponseBody> getTaskByRequestId(String assignee, String requestId) {
+		List<Task> taskList = taskService.createTaskQuery().processInstanceBusinessKey(requestId).taskAssignee(assignee)
+				.list();
 
+		List<TaskResponseBody> responseTaskList = new ArrayList<TaskResponseBody>();
+
+		taskList.forEach(task -> {
+			String taskId = task.getId();
+			Map<String, Object> processVariables = taskService.getVariables(taskId);
+			responseTaskList.add(new TaskResponseBody(task, processVariables));
+		});
+
+		return responseTaskList;
+	}
+
+	public String completeReview(Map<String, Object> parameters) {
+		List<Task> task = taskService.createTaskQuery().processInstanceBusinessKey((String) parameters.get("requestId"))
+				.taskAssignee((String) parameters.get("assignee")).list();
+		
+		String taskId = task.get(0).getId();
+		
 		Map<String, Object> variables = new HashMap<String, Object>();
-		variables.put("reviewerApproved", reviewerApproved);
-		variables.put("objectReviewerReview", objectReviewerReview);
+		variables.put("reviewerApproved", parameters.get("reviewerApproved"));
+		variables.put("reviewercomments", parameters.get("reviewercomments"));
 
 		taskService.complete(taskId, variables);
-
+		
+		return null;
 	}
 
-	public void completeApproverTask(String taskId, String approverApproved, String objectApproverReview) {
-
+	
+	public String completeApproval(Map<String, Object> parameters) {
+		List<Task> task = taskService.createTaskQuery().processInstanceBusinessKey((String) parameters.get("requestId"))
+				.taskAssignee((String) parameters.get("assignee")).list();
+		
+		String taskId = task.get(0).getId();
+		
 		Map<String, Object> variables = new HashMap<String, Object>();
-		variables.put("approverApproved", approverApproved);
-		variables.put("objectApproverReview", objectApproverReview);
+		variables.put("reviewerApproved", parameters.get("approverApproved"));
+		variables.put("reviewercomments", parameters.get("approvercomments"));
 
 		taskService.complete(taskId, variables);
-
+		
+		return null;
 	}
+	
+	/*
+	 * public void completeReviewerTask(String taskId, String reviewerApproved,
+	 * String objectReviewerReview) {
+	 * 
+	 * Map<String, Object> variables = new HashMap<String, Object>();
+	 * variables.put("reviewerApproved", reviewerApproved);
+	 * variables.put("objectReviewerReview", objectReviewerReview);
+	 * 
+	 * taskService.complete(taskId, variables);
+	 * 
+	 * }
+	 * 
+	 * public void completeApproverTask(String taskId, String approverApproved,
+	 * String objectApproverReview) {
+	 * 
+	 * Map<String, Object> variables = new HashMap<String, Object>();
+	 * variables.put("approverApproved", approverApproved);
+	 * variables.put("objectApproverReview", objectApproverReview);
+	 * 
+	 * taskService.complete(taskId, variables);
+	 * 
+	 * }
+	 */
 
 }
