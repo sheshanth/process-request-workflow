@@ -73,7 +73,7 @@ public class ProcessController {
 	@GetMapping(value = "/process-request/{assignee}/requestId/{requestId}")
 	public String getTask(@PathVariable(name = "assignee") String assignee, @PathVariable(name = "requestId") String requestId) {
 
-		List<TaskResponseBody> taskList = processService.getTaskByRequestId(assignee, requestId);	
+		List<TaskResponseBody> taskList = processService.getAssigneeTaskByRequestId(assignee, requestId);	
 
 		return taskList.toString();
 	}

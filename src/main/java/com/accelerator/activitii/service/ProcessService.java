@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -31,6 +33,12 @@ public class ProcessService {
 
 	@Autowired
 	private RepositoryService repositoryService;
+	
+	@Autowired
+	private HistoryService historyService;
+	
+	@Autowired
+	private IdentityService identityService;
 
 	public void startTheProcess(Map<String, Object> parameters, String processDefinitionId) {
 
@@ -41,7 +49,7 @@ public class ProcessService {
 
 	public List<TaskResponseBody> getTasks(String assignee) {
 		List<Task> taskList = taskService.createTaskQuery().taskAssignee(assignee).list();
-
+		
 		List<TaskResponseBody> responseTaskList = new ArrayList<TaskResponseBody>();
 
 		taskList.forEach(task -> {
@@ -53,7 +61,7 @@ public class ProcessService {
 		return responseTaskList;
 	}
 
-	public List<TaskResponseBody> getTaskByRequestId(String assignee, String requestId) {
+	public List<TaskResponseBody> getAssigneeTaskByRequestId(String assignee, String requestId) {
 		List<Task> taskList = taskService.createTaskQuery().processInstanceBusinessKey(requestId).taskAssignee(assignee)
 				.list();
 
@@ -98,29 +106,5 @@ public class ProcessService {
 		
 		return null;
 	}
-	
-	/*
-	 * public void completeReviewerTask(String taskId, String reviewerApproved,
-	 * String objectReviewerReview) {
-	 * 
-	 * Map<String, Object> variables = new HashMap<String, Object>();
-	 * variables.put("reviewerApproved", reviewerApproved);
-	 * variables.put("objectReviewerReview", objectReviewerReview);
-	 * 
-	 * taskService.complete(taskId, variables);
-	 * 
-	 * }
-	 * 
-	 * public void completeApproverTask(String taskId, String approverApproved,
-	 * String objectApproverReview) {
-	 * 
-	 * Map<String, Object> variables = new HashMap<String, Object>();
-	 * variables.put("approverApproved", approverApproved);
-	 * variables.put("objectApproverReview", objectApproverReview);
-	 * 
-	 * taskService.complete(taskId, variables);
-	 * 
-	 * }
-	 */
 
 }
