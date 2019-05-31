@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.accelerator.activitii.model.CompletedTaskResponseBody;
 import com.accelerator.activitii.model.TaskResponseBody;
 import com.accelerator.activitii.service.ProcessService;
 
@@ -34,19 +35,9 @@ public class ProcessController {
 	@PostMapping(value = "/process-request")
 	public String startObjectReviewProcess(@RequestBody(required = true) Map<String, Object> parameters) {
 
-		/*
-		 * String requestId = parameters.get("requestId"); String objectId =
-		 * parameters.get("objectId"); String objectType = parameters.get("objectType");
-		 * String author = parameters.get("author"); String reviewer =
-		 * parameters.get("reviewer"); String approver = parameters.get("approver");
-		 */
-
-		/*
-		 * processService.startTheProcess(requestId, objectId, objectType, author,
-		 * reviewer, approver, "objApprovalProcess");
-		 */
-		
 		processService.startTheProcess(parameters, "objApprovalProcess");
+		
+		//processService.activeInstanceTask();
 
 		return "Process with requestId " + parameters.get("requestId") + " started.";
 	}
@@ -65,17 +56,28 @@ public class ProcessController {
 	@GetMapping(value = "/process-request/{assignee}")
 	public String getTask(@PathVariable(name = "assignee") String assignee) {
 
-		List<TaskResponseBody> taskList = processService.getTasks(assignee);	
+		List<TaskResponseBody> taskList = processService.getTasks(assignee);
 
 		return taskList.toString();
 	}
-	
-	@GetMapping(value = "/process-request/{assignee}/requestId/{requestId}")
-	public String getTask(@PathVariable(name = "assignee") String assignee, @PathVariable(name = "requestId") String requestId) {
 
-		List<TaskResponseBody> taskList = processService.getAssigneeTaskByRequestId(assignee, requestId);	
+	@GetMapping(value = "/process-request/{assignee}/requestId/{requestId}")
+	public String getTask(@PathVariable(name = "assignee") String assignee,
+			@PathVariable(name = "requestId") String requestId) {
+
+		List<TaskResponseBody> taskList = processService.getAssigneeTaskByRequestId(assignee, requestId);
 
 		return taskList.toString();
+	}
+
+	
+	@GetMapping(value = "/process-request/{assignee}/objectId/{objectId}")
+	public String getAssigneeTaskByObjectIdTask(@PathVariable(name = "assignee") String assignee,
+			@PathVariable(name = "objectId") String objectId) {
+
+		List<TaskResponseBody> tasklist = processService.getAssigneeTaskByObjectId(assignee, objectId);
+		
+		return tasklist.toString();
 	}
 
 	/*
@@ -86,18 +88,22 @@ public class ProcessController {
 	 * the task ID and then complete it based on the task id
 	 * 
 	 */
-	
+
 	@PostMapping(value = "/process-request/review")
 	public String reviewTask(@RequestBody Map<String, Object> parameters) {
 		processService.completeReview(parameters);
 		return "task completed";
 	}
-	
-	
+
 	@PostMapping(value = "/process-request/approve")
 	public String approveTask(@RequestBody Map<String, Object> parameters) {
 		processService.completeApproval(parameters);
 		return "task completed";
+	}
+
+	@GetMapping(value = "/process-request/completed/{assignee}")
+	public List<CompletedTaskResponseBody> completedTaskByAssignee(@PathVariable(name = "assignee") String assignee) {
+		return processService.completedTaskByAssignee(assignee);
 	}
 	
 }

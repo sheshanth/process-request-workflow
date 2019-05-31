@@ -38,7 +38,7 @@
 					<activiti:value id="true" name="Approve" />
 					<activiti:value id="false" name="Reject" />
 				</activiti:formProperty>
-				<activiti:formProperty id="reviewercomments"
+				<activiti:formProperty id="reviewerComments"
 					name="reviewer comments" type="string" />
 			</extensionElements>
 		</userTask>
