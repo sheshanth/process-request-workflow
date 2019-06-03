@@ -44,6 +44,8 @@ public class ProcessService {
 
 	// start the process
 	public void startTheProcess(Map<String, Object> parameters, String processDefinitionId) {
+		
+		//parameters.put("assigneeList", Arrays.asList("kermit","fozzo"));
 
 		runtimeService.startProcessInstanceByKey(processDefinitionId, (String) parameters.get("requestId"), parameters);
 		logger.info("process {} is started ", processDefinitionId);
@@ -61,7 +63,7 @@ public class ProcessService {
 			Map<String, Object> processVariables = taskService.getVariables(taskId);
 			responseTaskList.add(new TaskResponseBody(task, processVariables));
 		});
-
+		
 		return responseTaskList;
 	}
 

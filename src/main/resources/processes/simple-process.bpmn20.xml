@@ -41,6 +41,12 @@
 				<activiti:formProperty id="reviewerComments"
 					name="reviewer comments" type="string" />
 			</extensionElements>
+			<multiInstanceLoopCharacteristics
+				isSequential="false">
+				<loopDataInputRef>assigneeList</loopDataInputRef>
+				<inputDataItem name="reviewer"/>
+				<!-- <loopCardinality>5</loopCardinality> -->
+			</multiInstanceLoopCharacteristics>
 		</userTask>
 		<sequenceFlow id="flow1" sourceRef="startEvent1"
 			targetRef="pendingForReview" />
